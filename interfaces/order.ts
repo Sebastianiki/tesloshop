@@ -9,6 +9,7 @@ export interface IOrder {
   summary         : IOrderSummary
   isPaid          : boolean
   paidAt?         : string
+  transactionId?  : string
 }
 
 export interface IOrderItem {
