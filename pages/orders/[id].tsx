@@ -1,15 +1,30 @@
-import NextLink from "next/link"
+import { useState } from 'react';
 import { GetServerSideProps, NextPage } from 'next'
+import { getSession } from "next-auth/react"
+import { useRouter } from 'next/router';
 
-import { Typography, Grid, Card, CardContent, Divider, Link, Box, Chip } from "@mui/material"
+import { Typography, Grid, Card, CardContent, Divider, Box, Chip, CircularProgress } from "@mui/material"
 import { CreditCardOffOutlined, CreditScoreOutlined } from "@mui/icons-material"
+
+import { PayPalButtons } from "@paypal/react-paypal-js";
+
 
 import { CartList, OrderSummary } from "../../components/cart"
 import { ShopLayout } from "../../components/layouts"
-import { getSession } from "next-auth/react"
 import { dbOrders } from "../../database"
 import { IOrder } from "../../interfaces"
 import { countries } from "../../utils"
+import { tesloApi } from '../../api';
+
+export type OrderResponseBody = {
+  id: string;
+  status:
+      | "COMPLETED"
+      | "SAVED"
+      | "APPROVED"
+      | "VOIDED"
+      | "PAYER_ACTION_REQUIRED";
+};
 
 interface Props {
   order: IOrder
@@ -17,8 +32,32 @@ interface Props {
 
 const OrderPage:NextPage<Props> = ({ order }) => {
 
+  const router = useRouter()
+
   const { _id, isPaid, summary : { numberOfItems }, shippingAddress, orderItems, summary } = order
   const { firstName, lastName, address, zip, phone, city, country } = shippingAddress
+
+  const [isPaying, setIsPaying] = useState(false)
+
+  const onOrderCompleted = async (details:OrderResponseBody) => {
+
+    if(details.status !== 'COMPLETED') {return alert('No hay pago en Paypal')}
+
+    setIsPaying(true)
+
+    try {
+      const { data } = await tesloApi.post(`/orders/pay`, {
+        transaction_id: details.id,
+        order_id: _id
+      })
+
+      router.reload()
+    } catch (error) {
+      console.log(error);
+      alert('Error')
+      setIsPaying(false)
+    }
+  }
 
   return (
     <ShopLayout title='Resumen de compra' pageDescription='Resumen de la orden'>
@@ -68,20 +107,52 @@ const OrderPage:NextPage<Props> = ({ order }) => {
 
               <OrderSummary summary={summary}/>
 
-              <Box sx={{ mt: 3 }}>
+              <Box sx={{ mt: 3 }} display='flex' flexDirection='column'>
+
                 {
-                  isPaid
-                    ? (
-                      <Chip 
-                        sx={{ my: 2 }} 
-                        label='Orden pagada' 
-                        variant='outlined'
-                        color='success'
-                        icon={ <CreditScoreOutlined/> }
-                      />
+                  isPaying
+                  ? (
+                      <Box display='flex' justifyContent='center' className='fadeIn'>
+                        <CircularProgress/>
+                      </Box>
                     )
-                    : <Typography variant="h1" component='h1'>Pagar</Typography>
+                  : (
+                    <Box>
+                      {
+                        isPaid
+                          ? (
+                            <Chip 
+                              sx={{ my: 2 }} 
+                              label='Orden pagada' 
+                              variant='outlined'
+                              color='success'
+                              icon={ <CreditScoreOutlined/> }
+                            />
+                          )
+                          : (
+                            <PayPalButtons
+                              createOrder={(data, actions) => {
+                                return actions.order.create({
+                                  purchase_units: [
+                                    {
+                                      amount: {
+                                        value: order.summary.total.toString(),
+                                      },
+                                    },
+                                  ],
+                                });
+                              }}
+                              onApprove={(data, actions) => {
+                                return actions.order.capture().then((details) => { onOrderCompleted(details) });
+                              }}
+                            />
+                          )
+                      }
+                    </Box>
+                  )
                 }
+
+                
               </Box>
 
             </CardContent>
