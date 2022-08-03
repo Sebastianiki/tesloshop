@@ -46,6 +46,7 @@ const createOrder = async(req: NextApiRequest, res: NextApiResponse<Data>) => {
     if( summary.total !== backendTotal ) throw new Error('El total no cuadra con el monto')
 
     const newOrder = new Order({ ...req.body, isPaid: false, user: session.user._id })
+    newOrder.summary.total = Math.round(newOrder.summary.total * 100) / 100
     await newOrder.save()
     await db.disconnect()
     
