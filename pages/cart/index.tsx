@@ -13,10 +13,8 @@ const CartPage = () => {
   const router = useRouter()
 
   useEffect(() => {
-    if ( isLoaded &&  cart.length === 0) router.replace('/cart/empty')
+    if (isLoaded && cart.length === 0) router.replace('/cart/empty')
   }, [isLoaded, cart, router])
-  
-  if( !isLoaded || cart.length === 0 ) return (<></>)
 
   return (
     <ShopLayout title='Carrito - 3' pageDescription='Carrito de compras de la tienda'>
