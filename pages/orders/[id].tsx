@@ -143,7 +143,7 @@ const OrderPage:NextPage<Props> = ({ order }) => {
                                 });
                               }}
                               onApprove={(data, actions) => {
-                                return actions.order.capture().then((details) => { onOrderCompleted(details) });
+                                return actions.order!.capture().then((details) => { onOrderCompleted(details) });
                               }}
                             />
                           )

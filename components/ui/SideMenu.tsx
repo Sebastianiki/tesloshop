@@ -1,5 +1,6 @@
 import { useContext, useState } from "react"
 import { useRouter } from "next/router"
+
 import { 
   Box, 
   Divider, 
@@ -23,8 +24,10 @@ import {
   LoginOutlined, 
   MaleOutlined, 
   SearchOutlined, 
-  VpnKeyOutlined 
+  VpnKeyOutlined,
+  DashboardOutlined
 } from "@mui/icons-material"
+
 import { AuthContext, UiContext } from "../../context"
 
 
@@ -167,21 +170,28 @@ export const SideMenu = () => {
                 <Divider />
                 <ListSubheader>Admin Panel</ListSubheader>
 
-                <ListItem button>
+                <ListItem button onClick={ () => navigateTo(`/admin`) }>
                   <ListItemIcon>
-                    <CategoryOutlined/>
+                    <DashboardOutlined/>
                   </ListItemIcon>
-                  <ListItemText primary={'Productos'} />
+                  <ListItemText primary={'Dashboard'} />
                 </ListItem>
 
-                <ListItem button>
+                <ListItem button onClick={ () => navigateTo(`/admin/orders`) }>
                   <ListItemIcon>
                     <ConfirmationNumberOutlined/>
                   </ListItemIcon>
                   <ListItemText primary={'Ordenes'} />
                 </ListItem>
 
-                <ListItem button>
+                <ListItem button onClick={ () => navigateTo(`/admin/products`) }>
+                  <ListItemIcon>
+                    <CategoryOutlined/>
+                  </ListItemIcon>
+                  <ListItemText primary={'Productos'} />
+                </ListItem>
+
+                <ListItem button onClick={ () => navigateTo(`/admin/users`) }>
                   <ListItemIcon>
                     <AdminPanelSettings/>
                   </ListItemIcon>

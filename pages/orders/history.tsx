@@ -39,14 +39,6 @@ const columns:GridColDef[] = [
   }
 ]
 
-// const rows = [
-//   { id: 1, paid: true, fullName: 'Rafael Reyes' },
-//   { id: 2, paid: false, fullName: 'Sebastian Reyes' },
-//   { id: 3, paid: false, fullName: 'Benjamin Reyes' },
-//   { id: 4, paid: true, fullName: 'Barbara Reyes' },
-//   { id: 5, paid: false, fullName: 'Veronica Uribe' }
-// ]
-
 interface Props {
   orders : IOrder[]
 }

@@ -10,6 +10,7 @@ import { useForm } from 'react-hook-form';
 
 import { AuthLayout } from '../../components/layouts'
 import { validations } from '../../utils';
+import { AuthContext } from '../../context';
 
 type FormData = {
   email   : string,
@@ -19,6 +20,8 @@ type FormData = {
 const LoginPage = () => {
 
   const router = useRouter()
+  const { loginUser } = useContext( AuthContext );
+
   const destination = router.query.p?.toString() || '/'
 
   const { register, handleSubmit, formState: { errors } } = useForm<FormData>();
@@ -37,15 +40,15 @@ const LoginPage = () => {
 
     setShowError(false)
 
-    // const isLogin = await loginUser( email, password )
+    const isLogin = await loginUser( email, password )
 
-    // if(!isLogin) {
-    //   setShowError(true)
-    //   setTimeout(() => {
-    //     setShowError(false)
-    //   }, 3000);
-    //   return
-    // }
+    if(!isLogin) {
+      setShowError(true)
+      setTimeout(() => {
+        setShowError(false)
+      }, 3000);
+      return
+    }
     
     // router.replace(destination)
     await signIn('credentials', { email, password })

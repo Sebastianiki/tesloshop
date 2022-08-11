@@ -1,6 +1,7 @@
 import { db } from "."
 import { IProduct } from "../interfaces";
 import { Product } from "../models"
+import { parseObject } from "../utils/helpers";
 
 export const getProductBySlug = async( slug:string ):Promise<IProduct | null> => {
   await db.connect()
@@ -8,7 +9,13 @@ export const getProductBySlug = async( slug:string ):Promise<IProduct | null> =>
   await db.disconnect()
 
   if( !product ) return null
-  return JSON.parse( JSON.stringify(product))
+
+  // TODO: procesamiento de las imagenes cuando las subamos
+  product.images = product.images.map ( image => {
+    return image.includes('http') ? image : `${process.env.HOST_NAME}/products/${image}`
+  })
+
+  return parseObject(product)
 }
 
 interface ProductSlug {
@@ -36,7 +43,14 @@ export const getProductsByTerm =async (term:string):Promise<IProduct[]> => {
 
   await db.disconnect();
 
-  return products
+  const updatedProducts = products.map( product => {
+    product.images = product.images.map ( image => {
+      return image.includes('http') ? image : `${process.env.HOST_NAME}/products/${image}`
+    })
+    return product
+  })
+
+  return updatedProducts
 }
 
 export const getAllProducts = async (limit:number = 0):Promise<IProduct[]> => {
@@ -48,5 +62,12 @@ export const getAllProducts = async (limit:number = 0):Promise<IProduct[]> => {
 
   await db.disconnect();
 
-  return JSON.parse( JSON.stringify(products))
+  const updatedProducts:IProduct[] = products.map( product => {
+    product.images = product.images.map ( image => {
+      return image.includes('http') ? image : `${process.env.HOST_NAME}/products/${image}`
+    })
+    return product
+  })
+
+  return parseObject(updatedProducts)
 }
